@@ -54,6 +54,12 @@ final class AutowireBeanFactoryObjectPostProcessor
 		this.autowireBeanFactory = autowireBeanFactory;
 	}
 
+	/**
+	 * 通过autowireBeanFactory将object注入spring容器中
+	 * @param object the object to initialize
+	 * @param <T>
+	 * @return
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T postProcess(T object) {

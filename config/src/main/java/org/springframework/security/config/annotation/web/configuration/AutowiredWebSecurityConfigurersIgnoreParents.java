@@ -45,6 +45,10 @@ public final class AutowiredWebSecurityConfigurersIgnoreParents {
 		this.beanFactory = beanFactory;
 	}
 
+	/**
+	 * 从beanFactory中获取类型为WebSecurityConfigurer的bean
+	 * @return
+	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<SecurityConfigurer<Filter, WebSecurity>> getWebSecurityConfigurers() {
 		List<SecurityConfigurer<Filter, WebSecurity>> webSecurityConfigurers = new ArrayList<>();

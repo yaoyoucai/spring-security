@@ -30,7 +30,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 /**
  * @author Joe Grandja
  */
-@EnableWebSecurity
+//@EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
@@ -58,7 +58,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 	// @formatter:on
 
-	@Bean
+//	@Bean
 	public UserDetailsService userDetailsService() {
 		UserDetails userDetails = User.withDefaultPasswordEncoder()
 				.username("user")

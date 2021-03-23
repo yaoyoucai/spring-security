@@ -269,6 +269,11 @@ public final class WebSecurity extends AbstractConfiguredSecurityBuilder<Filter,
 	}
 
 	@Override
+	protected void beforeInit() throws Exception {
+		super.beforeInit();
+	}
+
+	@Override
 	protected Filter performBuild() throws Exception {
 		Assert.state(!this.securityFilterChainBuilders.isEmpty(),
 				() -> "At least one SecurityBuilder<? extends SecurityFilterChain> needs to be specified. "
@@ -276,7 +281,13 @@ public final class WebSecurity extends AbstractConfiguredSecurityBuilder<Filter,
 						+ "or by adding a @Configuration that extends WebSecurityConfigurerAdapter. "
 						+ "More advanced users can invoke " + WebSecurity.class.getSimpleName()
 						+ ".addSecurityFilterChainBuilder directly");
+		/**
+		 * 过滤器链的总条数
+		 */
 		int chainSize = this.ignoredRequests.size() + this.securityFilterChainBuilders.size();
+		/**
+		 * 将所有过滤器链加入到securityFilterChains中
+		 */
 		List<SecurityFilterChain> securityFilterChains = new ArrayList<>(chainSize);
 		for (RequestMatcher ignoredRequest : this.ignoredRequests) {
 			securityFilterChains.add(new DefaultSecurityFilterChain(ignoredRequest));

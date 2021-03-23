@@ -34,6 +34,7 @@ import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.type.AnnotationMetadata;
@@ -164,22 +165,30 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 	 * {@code <SecurityConfigurer<FilterChainProxy, WebSecurityBuilder>} instances used to
 	 * create the web configuration
 	 * @throws Exception
-	 * 用于创建web configuration的SecurityConfigurer实例，
-	 * 注意该参数通过@Value(...)方式注入，对应的bean
-	 * autowiredWebSecurityConfigurersIgnoreParents
-	 * 也在该类中定义
+	 * webSecurityConfigurers 中包含websecurityConfigurerAdapter
 	 */
 	@Autowired(required = false)
 	public void setFilterChainProxySecurityConfigurer(ObjectPostProcessor<Object> objectPostProcessor,
 			@Value("#{@autowiredWebSecurityConfigurersIgnoreParents.getWebSecurityConfigurers()}") List<SecurityConfigurer<Filter, WebSecurity>> webSecurityConfigurers)
 			throws Exception {
+		/**
+		 * 将WebSecurity注入到 spring 容器中
+		 */
 		this.webSecurity = objectPostProcessor.postProcess(new WebSecurity(objectPostProcessor));
 		if (this.debugEnabled != null) {
 			this.webSecurity.debug(this.debugEnabled);
 		}
+
+		/**
+		 * 对webSecurityConfigurers进行排序，也就是如果存在多个websecurityConfigurerAdapter的话，
+		 * 会先进行一次排序后使用
+		 */
 		webSecurityConfigurers.sort(AnnotationAwareOrderComparator.INSTANCE);
 		Integer previousOrder = null;
 		Object previousConfig = null;
+		/**
+		 * 判断是否有排序号相同的webSecurityConfigurer,如果有，则报错
+		 */
 		for (SecurityConfigurer<Filter, WebSecurity> config : webSecurityConfigurers) {
 			Integer order = AnnotationAwareOrderComparator.lookupOrder(config);
 			if (previousOrder != null && previousOrder.equals(order)) {
@@ -189,6 +198,10 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 			previousOrder = order;
 			previousConfig = config;
 		}
+
+		/**
+		 * 存入 AbstractConfiguredSecurityBuilder.configurers
+		 */
 		for (SecurityConfigurer<Filter, WebSecurity> webSecurityConfigurer : webSecurityConfigurers) {
 			this.webSecurity.apply(webSecurityConfigurer);
 		}

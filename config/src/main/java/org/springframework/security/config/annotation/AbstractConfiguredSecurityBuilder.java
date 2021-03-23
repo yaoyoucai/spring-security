@@ -296,12 +296,27 @@ public abstract class AbstractConfiguredSecurityBuilder<O, B extends SecurityBui
 	protected final O doBuild() throws Exception {
 		synchronized (this.configurers) {
 			this.buildState = BuildState.INITIALIZING;
+			/**
+			 * 初始化前的预留方法，留待子类实现
+			 */
 			beforeInit();
+			/**
+			 * 初始化
+			 */
 			init();
 			this.buildState = BuildState.CONFIGURING;
+			/**
+			 * 配置前的预留方法，留待子类实现
+			 */
 			beforeConfigure();
+			/**
+			 * 配置
+			 */
 			configure();
 			this.buildState = BuildState.BUILDING;
+			/**
+			 * 构建，由子类实现
+			 */
 			O result = performBuild();
 			this.buildState = BuildState.BUILT;
 			return result;
