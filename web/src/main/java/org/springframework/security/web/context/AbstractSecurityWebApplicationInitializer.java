@@ -112,6 +112,7 @@ public abstract class AbstractSecurityWebApplicationInitializer implements WebAp
 			servletContext.addListener("org.springframework.security.web.session.HttpSessionEventPublisher");
 		}
 		servletContext.setSessionTrackingModes(getSessionTrackingModes());
+
 		insertSpringSecurityFilterChain(servletContext);
 		afterSpringSecurityFilterChain(servletContext);
 	}
@@ -129,6 +130,7 @@ public abstract class AbstractSecurityWebApplicationInitializer implements WebAp
 	/**
 	 * Registers the springSecurityFilterChain
 	 * @param servletContext the {@link ServletContext}
+	 * 将名称为 springSecurityFilterChain 的DelegatingFilterProxy注入到servlet中
 	 */
 	private void insertSpringSecurityFilterChain(ServletContext servletContext) {
 		String filterName = DEFAULT_FILTER_NAME;
@@ -191,6 +193,9 @@ public abstract class AbstractSecurityWebApplicationInitializer implements WebAp
 	 */
 	private void registerFilter(ServletContext servletContext, boolean insertBeforeOtherFilters, String filterName,
 			Filter filter) {
+		/**
+		 * 将过滤器注入到servlet中
+		 */
 		Dynamic registration = servletContext.addFilter(filterName, filter);
 		Assert.state(registration != null, () -> "Duplicate Filter registration for '" + filterName
 				+ "'. Check to ensure the Filter is only configured once.");

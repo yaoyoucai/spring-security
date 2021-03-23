@@ -425,6 +425,9 @@ public class StrictHttpFirewall implements HttpFirewall {
 
 	@Override
 	public FirewalledRequest getFirewalledRequest(HttpServletRequest request) throws RequestRejectedException {
+		/**
+		 * 根据请求方式拦截请求
+		 */
 		rejectForbiddenHttpMethod(request);
 		rejectedBlocklistedUrls(request);
 		rejectedUntrustedHosts(request);
@@ -440,10 +443,16 @@ public class StrictHttpFirewall implements HttpFirewall {
 	}
 
 	private void rejectForbiddenHttpMethod(HttpServletRequest request) {
+		/**
+		 * 任何请求都可以通过
+		 */
 		if (this.allowedHttpMethods == ALLOW_ANY_HTTP_METHOD) {
 			return;
 		}
 		if (!this.allowedHttpMethods.contains(request.getMethod())) {
+			/**
+			 * 当请求方式不在预设的请求范围内，则报错
+			 */
 			throw new RequestRejectedException(
 					"The request was rejected because the HTTP method \"" + request.getMethod()
 							+ "\" was not included within the list of allowed HTTP methods " + this.allowedHttpMethods);
@@ -480,6 +489,9 @@ public class StrictHttpFirewall implements HttpFirewall {
 		return new FirewalledResponse(response);
 	}
 
+	/**
+	 *  可以通过的请求类型
+	 */
 	private static Set<String> createDefaultAllowedHttpMethods() {
 		Set<String> result = new HashSet<>();
 		result.add(HttpMethod.DELETE.name());

@@ -125,12 +125,25 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 
 	private static final String SUFFIX = "}";
 
+	/**
+	 * 通过id来匹配编码器，该id不能是 {} 包括的。
+	 */
 	private final String idForEncode;
 
+	/**
+	 * 通过上面 idForEncode 所匹配到的 PasswordEncoder 用来对密码进行编码。
+	 */
 	private final PasswordEncoder passwordEncoderForEncode;
 
+	/**
+	 * 用来维护多个 idForEncode 与具体 PasswordEncoder 的映射关系。 DelegatingPasswordEncoder 初始化时
+	 * 装载进去，会在初始化时进行一些规则校验。
+	 */
 	private final Map<String, PasswordEncoder> idToPasswordEncoder;
 
+	/**
+	 * 默认的密码匹配器，上面的 Map 中都不存在就用它来执行 matches 方法进行匹配验证。这是一个内部类实现。
+	 */
 	private PasswordEncoder defaultPasswordEncoderForMatches = new UnmappedIdPasswordEncoder();
 
 	/**
@@ -140,6 +153,9 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 	 * @param idToPasswordEncoder a Map of id to {@link PasswordEncoder} used to determine
 	 * which {@link PasswordEncoder} should be used for
 	 * {@link #matches(CharSequence, String)}
+	 */
+	/**
+	 * 初始化传入，用来提供默认的密码编码器。
 	 */
 	public DelegatingPasswordEncoder(String idForEncode, Map<String, PasswordEncoder> idToPasswordEncoder) {
 		if (idForEncode == null) {
@@ -191,6 +207,16 @@ public class DelegatingPasswordEncoder implements PasswordEncoder {
 		return PREFIX + this.idForEncode + SUFFIX + this.passwordEncoderForEncode.encode(rawPassword);
 	}
 
+	/**
+	 * @title matches
+	 * @Description 密码匹配方法
+	 * @author huanyao
+	 * @date 2021/3/17 10:16 上午
+	 * @param: rawPassword
+	 * @param: prefixEncodedPassword
+	 * @return: boolean
+	 * @throws
+	 */
 	@Override
 	public boolean matches(CharSequence rawPassword, String prefixEncodedPassword) {
 		if (rawPassword == null && prefixEncodedPassword == null) {

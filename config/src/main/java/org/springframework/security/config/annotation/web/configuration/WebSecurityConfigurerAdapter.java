@@ -313,6 +313,9 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	@Override
 	public void init(WebSecurity web) throws Exception {
 		HttpSecurity http = getHttp();
+		/**
+		 * 把HttpSecurity作为一条过滤器添加到过滤器链中
+		 */
 		web.addSecurityFilterChainBuilder(http).postBuildAction(() -> {
 			FilterSecurityInterceptor securityInterceptor = http.getSharedObject(FilterSecurityInterceptor.class);
 			web.securityInterceptor(securityInterceptor);
@@ -369,6 +372,9 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	public void setApplicationContext(ApplicationContext context) {
 		this.context = context;
 		ObjectPostProcessor<Object> objectPostProcessor = context.getBean(ObjectPostProcessor.class);
+		/**
+		 * 生成passwordEncoder
+		 */
 		LazyPasswordEncoder passwordEncoder = new LazyPasswordEncoder(context);
 		this.authenticationBuilder = new DefaultPasswordEncoderAuthenticationManagerBuilder(objectPostProcessor,
 				passwordEncoder);
@@ -421,6 +427,7 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 	/**
 	 * Creates the shared objects
 	 * @return the shared Objects
+	 * 将
 	 */
 	private Map<Class<?>, Object> createSharedObjects() {
 		Map<Class<?>, Object> sharedObjects = new HashMap<>();
@@ -604,6 +611,9 @@ public abstract class WebSecurityConfigurerAdapter implements WebSecurityConfigu
 			if (this.passwordEncoder != null) {
 				return this.passwordEncoder;
 			}
+			/**
+			 * 如果spring容器中存在PasswordEncoder，就复用，如果不存在，则使用默认的
+			 */
 			PasswordEncoder passwordEncoder = getBeanOrNull(PasswordEncoder.class);
 			if (passwordEncoder == null) {
 				passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();

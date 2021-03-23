@@ -288,6 +288,9 @@ public abstract class AbstractAuthenticationFilterConfigurer<B extends HttpSecur
 			this.authFilter.setRememberMeServices(rememberMeServices);
 		}
 		F filter = postProcess(this.authFilter);
+		/**
+		 * 添加拦截器到HttpSecurity
+		 */
 		http.addFilter(filter);
 	}
 

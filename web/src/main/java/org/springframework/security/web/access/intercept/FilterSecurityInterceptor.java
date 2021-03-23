@@ -41,6 +41,8 @@ import org.springframework.security.web.FilterInvocation;
  *
  * @author Ben Alex
  * @author Rob Winch
+ *
+ * 通过过滤器实现对HTTP资源进行安全处理。
  */
 public class FilterSecurityInterceptor extends AbstractSecurityInterceptor implements Filter {
 
@@ -74,6 +76,7 @@ public class FilterSecurityInterceptor extends AbstractSecurityInterceptor imple
 	 * @param chain the filter chain
 	 * @throws IOException if the filter chain fails
 	 * @throws ServletException if the filter chain fails
+	 * FilterInvocation 过滤器回调
 	 */
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

@@ -282,10 +282,19 @@ public final class WebSecurity extends AbstractConfiguredSecurityBuilder<Filter,
 			securityFilterChains.add(new DefaultSecurityFilterChain(ignoredRequest));
 		}
 		for (SecurityBuilder<? extends SecurityFilterChain> securityFilterChainBuilder : this.securityFilterChainBuilders) {
+			/**
+			 * HttpSecurity本身也是一个SecurityBuilder，因此其会返回一个过滤器链
+			 */
 			securityFilterChains.add(securityFilterChainBuilder.build());
 		}
+		/**
+		 * 创建FilterChainProxy 对象
+		 */
 		FilterChainProxy filterChainProxy = new FilterChainProxy(securityFilterChains);
 		if (this.httpFirewall != null) {
+			/**
+			 * 防火墙设置
+			 */
 			filterChainProxy.setFirewall(this.httpFirewall);
 		}
 		if (this.requestRejectedHandler != null) {

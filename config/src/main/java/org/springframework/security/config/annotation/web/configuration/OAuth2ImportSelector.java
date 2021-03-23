@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
  * @since 5.1
  * @see OAuth2ClientConfiguration
  * @see SecurityReactorContextConfiguration
+ * 引入oauth2相关类
  */
 final class OAuth2ImportSelector implements ImportSelector {
 

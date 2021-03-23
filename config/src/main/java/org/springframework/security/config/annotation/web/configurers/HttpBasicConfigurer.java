@@ -190,6 +190,7 @@ public final class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>>
 	@Override
 	public void configure(B http) {
 		AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
+		//构建基础验证过滤器
 		BasicAuthenticationFilter basicAuthenticationFilter = new BasicAuthenticationFilter(authenticationManager,
 				this.authenticationEntryPoint);
 		if (this.authenticationDetailsSource != null) {
@@ -200,6 +201,7 @@ public final class HttpBasicConfigurer<B extends HttpSecurityBuilder<B>>
 			basicAuthenticationFilter.setRememberMeServices(rememberMeServices);
 		}
 		basicAuthenticationFilter = postProcess(basicAuthenticationFilter);
+		//在HttpSecurity中加入过滤器
 		http.addFilter(basicAuthenticationFilter);
 	}
 

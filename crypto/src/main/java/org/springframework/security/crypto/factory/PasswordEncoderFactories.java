@@ -64,6 +64,7 @@ public final class PasswordEncoderFactories {
 	 */
 	@SuppressWarnings("deprecation")
 	public static PasswordEncoder createDelegatingPasswordEncoder() {
+		//默认的密码器
 		String encodingId = "bcrypt";
 		Map<String, PasswordEncoder> encoders = new HashMap<>();
 		encoders.put(encodingId, new BCryptPasswordEncoder());

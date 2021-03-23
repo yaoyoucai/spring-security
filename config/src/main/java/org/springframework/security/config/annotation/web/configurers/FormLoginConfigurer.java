@@ -177,6 +177,15 @@ public final class FormLoginConfigurer<H extends HttpSecurityBuilder<H>> extends
 	 * "/login")
 	 * @return the {@link FormLoginConfigurer} for additional customization
 	 */
+	/**
+	 * @title loginPage
+	 * @Description 登录 页面而并不是接口，对于前后分离模式需要我们进行改 造 默认为 /login
+	 * @author huanyao
+	 * @date 2021/3/18 10:25 上午
+	 * @param: loginPage
+	 * @return: org.springframework.security.config.annotation.web.configurers.FormLoginConfigurer<H>
+	 * @throws
+	 */
 	@Override
 	public FormLoginConfigurer<H> loginPage(String loginPage) {
 		return super.loginPage(loginPage);

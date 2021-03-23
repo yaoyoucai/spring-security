@@ -27,8 +27,10 @@ import org.springframework.util.ClassUtils;
  *
  * @author Rob Winch
  * @since 3.2
+ * 当存在DispatcherServlet时，将WebMvcSecurityConfiguration注册到spring容器中
  */
 class SpringWebMvcImportSelector implements ImportSelector {
+
 
 	@Override
 	public String[] selectImports(AnnotationMetadata importingClassMetadata) {

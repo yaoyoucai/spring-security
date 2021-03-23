@@ -66,11 +66,22 @@ import org.springframework.util.Assert;
  * @author Keesun Baik
  * @since 3.2
  */
+/** * Spring Web Security 的配置类 :
+
+ * 1. 使用一个 WebSecurity 对象基于安全配置创建一个 FilterChainProxy 对象来对用户请求 进行安全过滤。
+ * 2. 也会暴露诸如 安全SpEL表达式处理器 SecurityExpressionHandler 等一些类。
+ *
+ * @see EnableWebSecurity
+ * @see WebSecurity
+ *
+ * @author Rob Winch
+ * @author Keesun Baik
+ * @since 3.2 */
 @Configuration(proxyBeanMethods = false)
 public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAware {
 
 	private WebSecurity webSecurity;
-
+	// 是否启用了调试模式，来自注解 @EnableWebSecurity 的属性 debug，缺省值 false
 	private Boolean debugEnabled;
 
 	private List<SecurityConfigurer<Filter, WebSecurity>> webSecurityConfigurers;
@@ -84,11 +95,14 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 	@Autowired(required = false)
 	private ObjectPostProcessor<Object> objectObjectPostProcessor;
 
+	/** * * 代理监听器 应该时监听 DefaultAuthenticationEventPublisher 的一些处理策略 */
 	@Bean
 	public static DelegatingApplicationListener delegatingApplicationListener() {
 		return new DelegatingApplicationListener();
 	}
 
+	/** * * 安全SpEL表达式处理器 SecurityExpressionHandler 缺省为一个
+	 * DefaultWebSecurityExpressionHandler */
 	@Bean
 	@DependsOn(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME)
 	public SecurityExpressionHandler<FilterInvocation> webSecurityExpressionHandler() {
@@ -99,6 +113,7 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 	 * Creates the Spring Security Filter Chain
 	 * @return the {@link Filter} that represents the security filter chain
 	 * @throws Exception
+	 * spring Security 核心过滤器
 	 */
 	@Bean(name = AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME)
 	public Filter springSecurityFilterChain() throws Exception {
@@ -112,6 +127,7 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 					});
 			this.webSecurity.apply(adapter);
 		}
+
 		for (SecurityFilterChain securityFilterChain : this.securityFilterChains) {
 			this.webSecurity.addSecurityFilterChainBuilder(() -> securityFilterChain);
 			for (Filter filter : securityFilterChain.getFilters()) {
@@ -131,6 +147,7 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 	 * Creates the {@link WebInvocationPrivilegeEvaluator} that is necessary for the JSP
 	 * tag support.
 	 * @return the {@link WebInvocationPrivilegeEvaluator}
+	 * 用于模板 如JSP Freemarker 的一些页面标签按钮控制支持
 	 */
 	@Bean
 	@DependsOn(AbstractSecurityWebApplicationInitializer.DEFAULT_FILTER_NAME)
@@ -147,6 +164,10 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 	 * {@code <SecurityConfigurer<FilterChainProxy, WebSecurityBuilder>} instances used to
 	 * create the web configuration
 	 * @throws Exception
+	 * 用于创建web configuration的SecurityConfigurer实例，
+	 * 注意该参数通过@Value(...)方式注入，对应的bean
+	 * autowiredWebSecurityConfigurersIgnoreParents
+	 * 也在该类中定义
 	 */
 	@Autowired(required = false)
 	public void setFilterChainProxySecurityConfigurer(ObjectPostProcessor<Object> objectPostProcessor,
@@ -191,12 +212,29 @@ public class WebSecurityConfiguration implements ImportAware, BeanClassLoaderAwa
 		return new RsaKeyConversionServicePostProcessor();
 	}
 
+	/**
+
+	 * 从当前bean容器中获取所有的WebSecurityConfigurer bean。
+
+	 * 这些WebSecurityConfigurer通常是由开发人员实现的配置类，并且继承自 WebSecurityConfigurerAdapter
+
+	 *
+
+	 */
 	@Bean
 	public static AutowiredWebSecurityConfigurersIgnoreParents autowiredWebSecurityConfigurersIgnoreParents(
 			ConfigurableListableBeanFactory beanFactory) {
 		return new AutowiredWebSecurityConfigurersIgnoreParents(beanFactory);
 	}
 
+	/**
+	 * @title setImportMetadata
+	 * @Description 主要是为了获取注解 @EnableWebSecurity 的属性 debugEnabled
+	 * @author huanyao
+	 * @date 2021/3/18 9:17 上午
+	 * @param: importMetadata
+	 * @throws
+	 */
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		Map<String, Object> enableWebSecurityAttrMap = importMetadata

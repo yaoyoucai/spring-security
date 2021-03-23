@@ -66,18 +66,39 @@ public class User implements UserDetails, CredentialsContainer {
 
 	private static final Log logger = LogFactory.getLog(User.class);
 
+	/**
+	 * 用户的加密后的密码， 不加密会使用 {noop} 前缀
+	 */
 	private String password;
 
+	/**
+	 * 应用内唯一的用户名
+	 */
 	private final String username;
 
+	/**
+	 * 用户的权限集， 默认需要添加 ROLE_ 前缀
+	 */
 	private final Set<GrantedAuthority> authorities;
 
+	/**
+	 * 账户是否过期
+	 */
 	private final boolean accountNonExpired;
 
+	/**
+	 * 账户是否锁定
+	 */
 	private final boolean accountNonLocked;
 
+	/**
+	 * 凭证是否过期
+	 */
 	private final boolean credentialsNonExpired;
 
+	/**
+	 * 用户是否可用
+	 */
 	private final boolean enabled;
 
 	/**

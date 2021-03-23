@@ -214,25 +214,42 @@ public abstract class AbstractAuthenticationProcessingFilter extends GenericFilt
 
 	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
+		/**
+		 * 先通过请求的uri来判断是否需要认证,比如默认的/login
+		 */
 		if (!requiresAuthentication(request, response)) {
 			chain.doFilter(request, response);
 			return;
 		}
 		try {
+			/**
+			 * 接着就是执行子类钩子方法attemptAuthentication来获取认证结果对象Authentication
+			 * ，这个对象不能是空 否则直接返回
+			 */
 			Authentication authenticationResult = attemptAuthentication(request, response);
 			if (authenticationResult == null) {
 				// return immediately as subclass has indicated that it hasn't completed
 				return;
 			}
+			/**
+			 * 处理session 策略，这里默认没有任何策略
+			 */
 			this.sessionStrategy.onAuthentication(authenticationResult, request, response);
 			// Authentication success
 			if (this.continueChainBeforeSuccessfulAuthentication) {
 				chain.doFilter(request, response);
 			}
+			/**
+			 * 认证成功后继续其它过滤器链 并最终交给认证成功处理器 AuthenticationSuccessHandler 处
+			 * 理
+			 */
 			successfulAuthentication(request, response, chain, authenticationResult);
 		}
 		catch (InternalAuthenticationServiceException failed) {
 			this.logger.error("An internal error occurred while trying to authenticate the user.", failed);
+			/**
+			 * 如果遇到异常 就会交给认证失败处理器 AuthenticationFailureHandler 来处理
+			 */
 			unsuccessfulAuthentication(request, response, failed);
 		}
 		catch (AuthenticationException ex) {

@@ -146,10 +146,20 @@ public class FilterChainProxy extends GenericFilterBean {
 
 	private static final String FILTER_APPLIED = FilterChainProxy.class.getName().concat(".APPLIED");
 
+	/**
+	 * 过滤器链
+	 */
 	private List<SecurityFilterChain> filterChains;
 
+	/**
+	 * ilterChainValidator 是 FilterChainProxy 配置完成后的校验方法，
+	 * 默认使用的 NullFilterChainValidator 实际上对应了一个空方法，也就是不做任何校验。
+	 */
 	private FilterChainValidator filterChainValidator = new NullFilterChainValidator();
 
+	/**
+	 * 防火墙
+	 */
 	private HttpFirewall firewall = new StrictHttpFirewall();
 
 	private RequestRejectedHandler requestRejectedHandler = new DefaultRequestRejectedHandler();
@@ -173,12 +183,16 @@ public class FilterChainProxy extends GenericFilterBean {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
+
 		boolean clearContext = request.getAttribute(FILTER_APPLIED) == null;
 		if (!clearContext) {
 			doFilterInternal(request, response, chain);
 			return;
 		}
 		try {
+			/**
+			 * 一般clearContext参数都为true,因此每次都先给 request 标记上 FILTER_APPLIED 属性
+			 */
 			request.setAttribute(FILTER_APPLIED, Boolean.TRUE);
 			doFilterInternal(request, response, chain);
 		}
@@ -186,15 +200,28 @@ public class FilterChainProxy extends GenericFilterBean {
 			this.requestRejectedHandler.handle((HttpServletRequest) request, (HttpServletResponse) response, ex);
 		}
 		finally {
+			/**
+			 * 除 SecurityContextHolder 中保存的用户信息
+			 */
 			SecurityContextHolder.clearContext();
+			/**
+			 * 同时移除 request 中的标记，标记意义何在，目前还不明确
+			 */
 			request.removeAttribute(FILTER_APPLIED);
 		}
 	}
 
 	private void doFilterInternal(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
+		/**
+		 * 封装一个 FirewalledRequest 对象，同时判断请求是否合法
+		 */
 		FirewalledRequest firewallRequest = this.firewall.getFirewalledRequest((HttpServletRequest) request);
+
 		HttpServletResponse firewallResponse = this.firewall.getFirewalledResponse((HttpServletResponse) response);
+		/**
+		 * 找到合适的过滤器链
+		 */
 		List<Filter> filters = getFilters(firewallRequest);
 		if (filters == null || filters.size() == 0) {
 			if (logger.isTraceEnabled()) {
@@ -215,6 +242,7 @@ public class FilterChainProxy extends GenericFilterBean {
 	 * Returns the first filter chain matching the supplied URL.
 	 * @param request the request to match
 	 * @return an ordered array of Filters defining the filter chain
+	 * 找到合适的过滤器链，并返回该过滤器链中的所有过滤器
 	 */
 	private List<Filter> getFilters(HttpServletRequest request) {
 		int count = 0;

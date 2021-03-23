@@ -59,10 +59,16 @@ class InitializeUserDetailsBeanManagerConfigurer extends GlobalAuthenticationCon
 			if (auth.isConfigured()) {
 				return;
 			}
+			/**
+			 * 不能有多个 否则 就中断
+			 */
 			UserDetailsService userDetailsService = getBeanOrNull(UserDetailsService.class);
 			if (userDetailsService == null) {
 				return;
 			}
+			/**
+			 * 开始配置普通 密码认证器 DaoAuthenticationProvider
+			 */
 			PasswordEncoder passwordEncoder = getBeanOrNull(PasswordEncoder.class);
 			UserDetailsPasswordService passwordManager = getBeanOrNull(UserDetailsPasswordService.class);
 			DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -83,6 +89,9 @@ class InitializeUserDetailsBeanManagerConfigurer extends GlobalAuthenticationCon
 		 */
 		private <T> T getBeanOrNull(Class<T> type) {
 			String[] beanNames = InitializeUserDetailsBeanManagerConfigurer.this.context.getBeanNamesForType(type);
+			/**
+			 * Spring IoC 不能同时存在多个type相关类型的Bean 否则无法注入
+			 */
 			if (beanNames.length != 1) {
 				return null;
 			}

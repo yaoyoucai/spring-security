@@ -46,7 +46,9 @@ import org.springframework.util.Assert;
  * @since 3.0
  */
 public class UsernamePasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-
+	/*
+	 * 默认取账户名、密码的key
+	 */
 	public static final String SPRING_SECURITY_FORM_USERNAME_KEY = "username";
 
 	public static final String SPRING_SECURITY_FORM_PASSWORD_KEY = "password";
@@ -54,12 +56,21 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 	private static final AntPathRequestMatcher DEFAULT_ANT_PATH_REQUEST_MATCHER = new AntPathRequestMatcher("/login",
 			"POST");
 
+	/*
+	 * 可以通过对应的set方法修改
+	 */
 	private String usernameParameter = SPRING_SECURITY_FORM_USERNAME_KEY;
 
 	private String passwordParameter = SPRING_SECURITY_FORM_PASSWORD_KEY;
 
+	/*
+	 *默认只支持 POST 请求
+	 */
 	private boolean postOnly = true;
 
+	/*
+	 * 初始化一个用户密码 认证过滤器 默认的登录uri 是 /login 请求方式是POST
+	 */
 	public UsernamePasswordAuthenticationFilter() {
 		super(DEFAULT_ANT_PATH_REQUEST_MATCHER);
 	}
@@ -68,20 +79,39 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 		super(DEFAULT_ANT_PATH_REQUEST_MATCHER, authenticationManager);
 	}
 
+	/*
+	 * 实现其父类 AbstractAuthenticationProcessingFilter 提供的钩子方法 用去尝试认证
+	 */
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
+		/*
+		 * 判断请求方式是否是POST
+		 */
 		if (this.postOnly && !request.getMethod().equals("POST")) {
 			throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
 		}
+		/*
+		 * 先去 HttpServletRequest 对象中获取账号名、密码
+		 */
 		String username = obtainUsername(request);
 		username = (username != null) ? username : "";
 		username = username.trim();
 		String password = obtainPassword(request);
 		password = (password != null) ? password : "";
+
+		/*
+		 * 然后把账号名、密码封装到 一个认证Token对象中，这是就是一个通行证，但是这时的状态时不 可信的，一旦通过认证就变为可信的
+		 */
 		UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(username, password);
 		// Allow subclasses to set the "details" property
+		/*
+		 * 会将 HttpServletRequest 中的一些细节 request.getRemoteAddr() request.getSession 存入的到Token中
+		 */
 		setDetails(request, authRequest);
+		/*
+		 * 然后 使用 父类中的 AuthenticationManager 对Token 进行认证
+		 */
 		return this.getAuthenticationManager().authenticate(authRequest);
 	}
 
@@ -98,6 +128,9 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 	 * @return the password that will be presented in the <code>Authentication</code>
 	 * request token to the <code>AuthenticationManager</code>
 	 */
+	/**
+	 * 获取密码 很重要 如果你想改变获取密码的方式要么在此处重写，要么通过自定义一个前置的过滤器保 证能此处能get到
+	 */
 	@Nullable
 	protected String obtainPassword(HttpServletRequest request) {
 		return request.getParameter(this.passwordParameter);
@@ -109,6 +142,9 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 	 * @param request so that request attributes can be retrieved
 	 * @return the username that will be presented in the <code>Authentication</code>
 	 * request token to the <code>AuthenticationManager</code>
+	 */
+	/**
+	 * 获取账户很重要 如果你想改变获取密码的方式要么在此处重写，要么通过自定义一个前置的过滤 器保证能此处能get到
 	 */
 	@Nullable
 	protected String obtainUsername(HttpServletRequest request) {
@@ -122,6 +158,9 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 	 * @param authRequest the authentication request object that should have its details
 	 * set
 	 */
+	/**
+	 * 参见上面对应的说明为凭据设置一些请求细节
+	 */
 	protected void setDetails(HttpServletRequest request, UsernamePasswordAuthenticationToken authRequest) {
 		authRequest.setDetails(this.authenticationDetailsSource.buildDetails(request));
 	}
@@ -130,6 +169,9 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 	 * Sets the parameter name which will be used to obtain the username from the login
 	 * request.
 	 * @param usernameParameter the parameter name. Defaults to "username".
+	 */
+	/**
+	 * 设置账户参数的key
 	 */
 	public void setUsernameParameter(String usernameParameter) {
 		Assert.hasText(usernameParameter, "Username parameter must not be empty or null");
@@ -140,6 +182,9 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 	 * Sets the parameter name which will be used to obtain the password from the login
 	 * request..
 	 * @param passwordParameter the parameter name. Defaults to "password".
+	 */
+	/**
+	 * 设置密码参数的key
 	 */
 	public void setPasswordParameter(String passwordParameter) {
 		Assert.hasText(passwordParameter, "Password parameter must not be empty or null");
@@ -154,6 +199,9 @@ public class UsernamePasswordAuthenticationFilter extends AbstractAuthentication
 	 * authentication.
 	 * <p>
 	 * Defaults to <tt>true</tt> but may be overridden by subclasses.
+	 */
+	/**
+	 * 认证的请求方式是否只支持POST请求
 	 */
 	public void setPostOnly(boolean postOnly) {
 		this.postOnly = postOnly;

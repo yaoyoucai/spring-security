@@ -77,6 +77,9 @@ public abstract class AbstractInterceptUrlConfigurer<C extends AbstractIntercept
 		if (metadataSource == null) {
 			return;
 		}
+		/**
+		 * 拦截器
+		 */
 		FilterSecurityInterceptor securityInterceptor = createFilterSecurityInterceptor(http, metadataSource,
 				http.getSharedObject(AuthenticationManager.class));
 		if (this.filterSecurityInterceptorOncePerRequest != null) {

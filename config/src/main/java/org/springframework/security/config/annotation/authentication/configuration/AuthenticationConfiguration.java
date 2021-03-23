@@ -75,6 +75,16 @@ public class AuthenticationConfiguration {
 
 	private ObjectPostProcessor<Object> objectPostProcessor;
 
+    /**
+     * @title authenticationManagerBuilder
+     * @Description 将身份认证管理器构建者注入到spring中
+     * @author huanyao
+     * @date 2021/3/18 3:38 下午
+     * @param: objectPostProcessor
+     * @param: context
+     * @return: org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+     * @throws
+     */
 	@Bean
 	public AuthenticationManagerBuilder authenticationManagerBuilder(ObjectPostProcessor<Object> objectPostProcessor,
 			ApplicationContext context) {
@@ -108,20 +118,47 @@ public class AuthenticationConfiguration {
 	}
 
 	public AuthenticationManager getAuthenticationManager() throws Exception {
+		/**
+		 *  先判断 AuthenticationManager 是否初始化
+		 */
 		if (this.authenticationManagerInitialized) {
+			/**
+			 *  如果已经初始化 那么直接返回初始化的
+			 */
 			return this.authenticationManager;
 		}
 		AuthenticationManagerBuilder authBuilder = this.applicationContext.getBean(AuthenticationManagerBuilder.class);
+		/**
+		 *  如果不是第一次构建 好像是每次总要通过Builder来进行构建
+		 */
 		if (this.buildingAuthenticationManager.getAndSet(true)) {
+			/**
+			 *  返回 一个委托的AuthenticationManager
+			 */
 			return new AuthenticationManagerDelegator(authBuilder);
 		}
+		/**
+		 *  如果是第一次通过Builder构建 将全局的认证配置整合到Builder中 那么以后就不用再整合全局的 配置了
+		 */
 		for (GlobalAuthenticationConfigurerAdapter config : this.globalAuthConfigurers) {
 			authBuilder.apply(config);
 		}
+		/**
+		 *  构建AuthenticationManager
+		 */
 		this.authenticationManager = authBuilder.build();
+		/**
+		 *  如果构建结果为null
+		 */
 		if (this.authenticationManager == null) {
+			/**
+			 *  再次尝试去Spring IoC 获取懒加载的 AuthenticationManager Bean
+			 */
 			this.authenticationManager = getAuthenticationManagerBean();
 		}
+		/**
+		 *  修改初始化状态
+		 */
 		this.authenticationManagerInitialized = true;
 		return this.authenticationManager;
 	}
